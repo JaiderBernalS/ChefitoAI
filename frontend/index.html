@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🍳 ChefitoIA</title>
+    <!-- MUY IMPORTANTE: index.html y style.css deben estar en la MISMA carpeta -->
+    <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+    <div class="app-container">
+        <!-- ===== SIDEBAR ===== -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Recetas <span class="icon">🧑‍🍳</span></h2>
+            </div>
+
+            <button class="new-chat-btn new-chat-btn-main">
+                <span class="icon">✨</span> Nueva Receta
+            </button>
+
+            <div class="history-section">
+                <!-- Aquí se pintan las conversaciones desde script.js -->
+            </div>
+
+            <div class="user-section">
+  <div class="user-avatar" id="userAvatar">
+    <!-- Inicial del usuario, la pone JS -->
+  </div>
+
+  <div class="user-menu" id="userMenu">
+    <div class="user-name" id="userNameLabel">Usuario</div>
+    <button id="logoutBtn" class="btn btn-logout full-width">
+      🚪 Cerrar sesión
+    </button>
+  </div>
+</div>
+        </div>
+
+        <!-- ===== CONTENIDO PRINCIPAL (CHAT) ===== -->
+        <div class="main-content">
+            <header class="chat-header">
+                <div>
+                    <h1>🍽️ Chefito</h1>
+                    <p>¡Listo para crear tu próxima obra maestra culinaria!</p>
+                </div>
+                <div class="model-status">
+                    <span class="status-dot"></span>
+                    <span>Modelo listo</span>
+                </div>
+            </header>
+
+            <!-- Caja donde se pintan los mensajes -->
+            <div id="chatBox" class="chat-box"></div>
+
+            <!-- Formulario de chat -->
+            <form id="chatForm" class="chat-form">
+    <textarea
+        id="userMessage"
+        placeholder="Escribe tus ingredientes o pregunta..."
+    ></textarea>
+
+    <!-- NUEVO: preview de la imagen -->
+    <div id="imagePreview" class="image-preview"></div>
+
+    <div class="input-controls">
+        <label for="file" class="file-label">
+            <span class="icon">📸</span> Añadir Ingrediente (Imagen)
+        </label>
+        <input type="file" id="file" accept="image/*" style="display: none" />
+
+        <button type="submit" class="send-btn">
+            Enviar Ingredientes <span class="icon">🚀</span>
+        </button>
+    </div>
+</form>
+        </div>
+    </div>
+
+    <!-- Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Lógica del chat / IA (el que ya tienes) -->
+    <script src="./script.js"></script>
+</body>
+</html>

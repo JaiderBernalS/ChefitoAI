@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChefitoIA 🧑‍🍳 - Login</title>
+    <link rel="stylesheet" href="./style.css" />
+</head>
+<body class="login-body">
+    <div class="login-overlay"></div>
+
+    <div class="login-container">
+        <div class="login-card">
+            <h1 class="login-title">Chefito 🧑‍🍳</h1>
+            <p class="login-subtitle">
+                Inicia sesión para guardar tus recetas y conversaciones.
+            </p>
+
+            <div class="login-tabs">
+                <button id="tab-login" class="login-tab active">Iniciar sesión</button>
+                <button id="tab-register" class="login-tab">Crear cuenta</button>
+            </div>
+
+            <!-- FORMULARIO LOGIN -->
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label for="login-username">Usuario</label>
+                    <input
+                        type="text"
+                        id="login-username"
+                        required
+                        autocomplete="username"
+                        placeholder="Tu usuario"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="login-password">Contraseña</label>
+                    <input
+                        type="password"
+                        id="login-password"
+                        required
+                        autocomplete="current-password"
+                        placeholder="Tu contraseña"
+                    />
+                </div>
+
+                <button type="submit" class="btn btn-primary full-width">
+                    Entrar
+                </button>
+            </form>
+
+            <!-- FORMULARIO REGISTRO -->
+            <form id="register-form" class="login-form hidden">
+                <div class="form-group">
+                    <label for="register-username">Usuario</label>
+                    <input
+                        type="text"
+                        id="register-username"
+                        required
+                        autocomplete="username"
+                        placeholder="Elige un usuario"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="register-email">Correo (opcional)</label>
+                    <input
+                        type="email"
+                        id="register-email"
+                        autocomplete="email"
+                        placeholder="tucorreo@ejemplo.com"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label for="register-password">Contraseña</label>
+                    <input
+                        type="password"
+                        id="register-password"
+                        required
+                        placeholder="Mínimo 6 caracteres"
+                    />
+                </div>
+
+                <button type="submit" class="btn btn-primary full-width">
+                    Crear cuenta
+                </button>
+            </form>
+
+            <div class="login-separator">
+                <span>o</span>
+            </div>
+
+            <button class="btn btn-secondary full-width" disabled>
+                🔒 Continuar con Google (pronto)
+            </button>
+        </div>
+    </div>
+
+    <script src="./auth.js"></script>
+</body>
+</html>

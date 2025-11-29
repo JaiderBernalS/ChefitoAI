@@ -11,8 +11,10 @@ from fastapi import (
     Request,
 )
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
-from google.genai import Client, types
+from fastapi.responses import StreamingResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
+
+from google.genai import Client, types, errors as genai_errors
 from dotenv import load_dotenv
 from typing import Optional
 from datetime import datetime, timedelta
@@ -20,12 +22,8 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from google.genai import errors as genai_errors
-import os
 import asyncio
 import os
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 
 from .database import Base, engine, SessionLocal
 from . import models, schemas
@@ -38,7 +36,7 @@ Base.metadata.create_all(bind=engine)
 _api_key = os.getenv("GEMINI_API_KEY")
 if not _api_key:
     raise RuntimeError("❌ Error: GEMINI_API_KEY no está definida en el archivo .env")
-API_KEY: str = _api_key  # ya es siempre str
+API_KEY: str = _api_key
 
 # --- CONFIG JWT / AUTH ---
 SECRET_KEY: str = os.getenv("SECRET_KEY") or "super_secret"
@@ -47,39 +45,31 @@ ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
     os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES") or "1440"
 )
 
-from passlib.context import CryptContext
-
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 app = FastAPI()
 
-app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
-
-# === SERVIR FRONTEND ESTÁTICO ===
+# === FRONTEND / ESTÁTICOS ===
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FRONTEND_DIR = os.path.join(BASE_DIR, "..", "frontend")
 
-# /static -> sirve JS, CSS, etc. desde la carpeta frontend
+# /static -> JS, CSS, imágenes
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
-
 
 @app.get("/", include_in_schema=False)
 async def serve_index():
-    """Sirve el index.html del frontend."""
     index_path = os.path.join(FRONTEND_DIR, "index.html")
     return FileResponse(index_path)
 
-
 @app.get("/login", include_in_schema=False)
 async def serve_login():
-    """Sirve el login.html del frontend."""
     login_path = os.path.join(FRONTEND_DIR, "login.html")
     return FileResponse(login_path)
 
-# Permitir conexión desde el frontend
+# === CORS ===
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # en producción restringe esto
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -87,7 +77,6 @@ app.add_middleware(
 
 # === GEMINI CLIENT ===
 client = Client(api_key=API_KEY)
-
 
 # === DEPENDENCIAS DB Y AUTH ===
 def get_db():
@@ -97,31 +86,23 @@ def get_db():
     finally:
         db.close()
 
-
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
-
 
 def verify_password(plain: str, hashed: str) -> bool:
     return pwd_context.verify(plain, hashed)
 
-
-def create_access_token(
-    data: dict, expires_delta: Optional[timedelta] = None
-) -> str:
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
     expire = datetime.utcnow() + (
         expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 async def get_current_user(
     request: Request, db: Session = Depends(get_db)
 ) -> models.User:
-    """Obtiene el usuario actual a partir del header Authorization: Bearer <token>."""
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.lower().startswith("bearer "):
         raise HTTPException(
@@ -149,21 +130,15 @@ async def get_current_user(
 
     return user
 
-
-# === MODELOS Pydantic PARA TÍTULOS ===
-
+# === Pydantic para títulos ===
 class TitleRequest(BaseModel):
     user_message: str
     assistant_message: Optional[str] = None
 
-
 class TitleResponse(BaseModel):
     title: str
 
-
-# === ENDPOINTS DE AUTENTICACIÓN ===
-
-
+# === AUTH ===
 @app.post("/auth/register", response_model=schemas.Token)
 def register(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
     existing = (
@@ -184,11 +159,7 @@ def register(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
     db.refresh(user)
 
     access_token = create_access_token({"sub": user.username})
-    return schemas.Token(
-        access_token=access_token,
-        user=user,
-    )
-
+    return schemas.Token(access_token=access_token, user=user)
 
 @app.post("/auth/login", response_model=schemas.Token)
 def login(user_in: schemas.UserLogin, db: Session = Depends(get_db)):
@@ -201,11 +172,7 @@ def login(user_in: schemas.UserLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Credenciales inválidas")
 
     access_token = create_access_token({"sub": user.username})
-    return schemas.Token(
-        access_token=access_token,
-        user=user,
-    )
-
+    return schemas.Token(access_token=access_token, user=user)
 
 # === HELPERS PARA CONVERSACIONES ===
 

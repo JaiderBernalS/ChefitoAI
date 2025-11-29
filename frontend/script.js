@@ -152,7 +152,7 @@ function forceLogout() {
     localStorage.removeItem("kitchenAssistantUsername");
     localStorage.removeItem("currentConversationId");
     localStorage.removeItem("chatHistory");
-    window.location.href = "login.html";
+    window.location.href = "login";
 }
 
 /**

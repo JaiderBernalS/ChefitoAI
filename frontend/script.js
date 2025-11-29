@@ -683,7 +683,7 @@ window.addEventListener("load", () => {
 
     // Solo exigimos token. El nombre puede faltar y se usa "Chef Invitado".
     if (!token) {
-        window.location.href = "login.html";
+        window.location.href = "login";
         return;
     }
 

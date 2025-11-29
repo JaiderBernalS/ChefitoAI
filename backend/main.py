@@ -53,6 +53,8 @@ pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 app = FastAPI()
 
+app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
+
 # === SERVIR FRONTEND ESTÁTICO ===
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FRONTEND_DIR = os.path.join(BASE_DIR, "..", "frontend")

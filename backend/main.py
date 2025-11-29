@@ -23,6 +23,9 @@ from pydantic import BaseModel
 from google.genai import errors as genai_errors
 import os
 import asyncio
+import os
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 from .database import Base, engine, SessionLocal
 from . import models, schemas
@@ -49,6 +52,27 @@ from passlib.context import CryptContext
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 app = FastAPI()
+
+# === SERVIR FRONTEND ESTÁTICO ===
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FRONTEND_DIR = os.path.join(BASE_DIR, "..", "frontend")
+
+# /static -> sirve JS, CSS, etc. desde la carpeta frontend
+app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
+
+
+@app.get("/", include_in_schema=False)
+async def serve_index():
+    """Sirve el index.html del frontend."""
+    index_path = os.path.join(FRONTEND_DIR, "index.html")
+    return FileResponse(index_path)
+
+
+@app.get("/login", include_in_schema=False)
+async def serve_login():
+    """Sirve el login.html del frontend."""
+    login_path = os.path.join(FRONTEND_DIR, "login.html")
+    return FileResponse(login_path)
 
 # Permitir conexión desde el frontend
 app.add_middleware(

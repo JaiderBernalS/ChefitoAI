@@ -88,7 +88,7 @@ registerForm.addEventListener("submit", async (e) => {
 
         const data = await res.json();
         saveSession(data.access_token, data.user.username);
-        window.location.href = "index.html";
+        window.location.href = "index";
     } catch (err) {
         console.error(err);
         alert("Error de conexión con el servidor");
